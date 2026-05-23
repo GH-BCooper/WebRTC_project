@@ -1,123 +1,331 @@
-# 📹 Peer-to-Peer Video Meeting
+# WebRTC using PeerJS
 
-A real-time peer-to-peer video calling and messaging web app built with **React** and **WebRTC** (via PeerJS). No backend server required for the actual call — just a direct browser-to-browser connection.
+A real-time peer-to-peer communication application built using React, WebRTC, and PeerJS.
 
-🔗 **Live Demo:** [horusknox.github.io/peertopeervideomeeting](https://horusknox.github.io/peertopeervideomeeting/)
+This project allows two users to connect directly using unique Peer IDs and communicate through:
 
----
+* Real-time text messaging
+* Video calling
+* Audio controls
+* Camera controls
+* Speech-to-text messaging
+* Connection request handling
+* Incoming call alerts
 
-## ✨ Features
-
-- 🎥 **Real-time video calling** — peer-to-peer, no server in the middle
-- 💬 **Text messaging** — send messages directly to the other peer
-- 🎤 **Speech-to-text** — speak your message instead of typing (Chrome only)
-- 🔒 **Persistent ID** — your unique ID is saved in localStorage across sessions
-
----
-
-## 🛠️ Tech Stack
-
-| Technology : Purpose |
-| React 18 : UI framework |
-| PeerJS : Simplifies WebRTC peer-to-peer connections |
-| WebRTC : Browser-to-browser video/audio/data streaming |
-| Web Speech API : Voice-to-text input |
-| GitHub Pages : Deployment |
+The application uses PeerJS on top of WebRTC to simplify peer-to-peer communication between browsers.
 
 ---
 
-## 📁 Project Structure
+# Features
 
-```
-src/
-├── components/
-│   ├── PeerToPeerMessaging.jsx   # Parent component — holds all state
-│   ├── CallControls.jsx          # Start/Stop video call buttons
-│   ├── VideoSection.jsx          # Local + remote video display
-│   ├── MessageInput.jsx          # Text input + speech recognition
-│   └── MessageList.jsx           # Incoming + outgoing messages
-│
-└── hooks/
-    ├── usePeer.js                # PeerJS setup and connection logic
-    ├── useVideoCall.js           # Video call start/stop logic
-    ├── useMessaging.js           # Send/receive messages logic
-    └── useSpeechRecognition.js   # Voice-to-text logic
-```
+## Peer-to-Peer Communication
+
+* Direct browser-to-browser communication
+* Unique Peer ID generation
+* Connection request system
+* Accept/Reject connection handling
+* Disconnect handling
+
+## Messaging System
+
+* Real-time messaging
+* Incoming and outgoing message tracking
+* Unified message history
+* Speech-to-text message input
+
+## Video Calling
+
+* One-to-one video calls
+* Incoming call alerts
+* Accept/Reject video call requests
+* Live video streaming
+* Call disconnect handling
+
+## Media Controls
+
+* Mute/Unmute microphone
+* Camera On/Off toggle
+* Stop video call functionality
+
+## User Experience
+
+* Dynamic UI states
+* Real-time alerts
+* Automatic peer reconnection handling
+* Clean component-based architecture
 
 ---
 
-## 🚀 Getting Started
+# Tech Stack
 
-### Prerequisites
+## Frontend
 
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- npm
+* React
+* JavaScript
+* CSS
 
-### Installation
+## Communication Technologies
+
+* WebRTC
+* PeerJS
+
+## Browser APIs
+
+* MediaDevices API
+* Speech Recognition API
+* Local Storage API
+
+---
+
+# Project Structure
 
 ```bash
-# Clone the repository
-git clone https://github.com/horusknox/peertopeervideomeeting.git
+src/
+│
+├── components/
+│   ├── App.js
+│   ├── CallControls.js
+│   ├── ConnectionRequest.js
+│   ├── IncomingCallAlert.js
+│   ├── MessageInput.js
+│   ├── MessageList.js
+│   ├── PeerToPeerMessaging.js
+│   └── VideoSection.js
+│
+├── hooks/
+│   ├── useConnection.js
+│   ├── useMessaging.js
+│   ├── usePeer.js
+│   ├── useSpeechRecognition.js
+│   └── useVideoCall.js
+│
+├── App.css
+├── index.css
+├── index.js
+└── PeerToPeerMessaging.css
+```
 
-# Navigate into the project
-cd peertopeervideomeeting
+---
 
-# Install dependencies
+# Installation
+
+## Clone the Repository
+
+```bash
+git clone <your-repository-url>
+```
+
+## Navigate to the Project Folder
+
+```bash
+cd <project-folder>
+```
+
+## Install Dependencies
+
+```bash
 npm install
+```
 
-# Start the development server
+---
+
+# Required Dependencies
+
+Install PeerJS:
+
+```bash
+npm install peerjs
+```
+
+---
+
+# Running the Project
+
+## Start Development Server
+
+```bash
 npm start
 ```
 
-The app will open at `http://localhost:3000`
-
----
-
-## 🧪 Testing Locally (Two Users)
-
-Since this is a peer-to-peer app, you need to simulate two users:
-
-1. Open `http://localhost:3000` in **Chrome**
-2. Open `http://localhost:3000` in a **Chrome Incognito window** (`Ctrl+Shift+N`)
-3. Copy the **Your ID** shown in Window 1
-4. Paste it into the **Other Party's ID** field in Window 2
-5. Click **Start Video Call** or send a message!
-
----
-
-## 📦 Deployment
-
-This app is deployed to GitHub Pages.
+The application will run on:
 
 ```bash
-# Build and deploy
-npm run deploy
+http://localhost:3000
 ```
 
 ---
 
-## ⚠️ Known Limitations
+# How It Works
 
-- Speech recognition only works in **Chrome** (uses `webkitSpeechRecognition`)
-- Both users need to be online at the same time
-- PeerJS uses a public signaling server by default — not recommended for production
+## Step 1: Peer ID Generation
+
+* Every user gets a unique Peer ID
+* IDs are stored in localStorage
+* Users share IDs to connect with others
+
+## Step 2: Connection Request
+
+* User enters recipient Peer ID
+* Connection request is sent
+* Recipient can accept or reject the request
+
+## Step 3: Messaging
+
+* Connected users can exchange messages instantly
+* Messages appear in sequence with sender information
+
+## Step 4: Video Calling
+
+* Users can initiate video calls
+* Incoming call popup appears for recipient
+* Calls use WebRTC media streams
 
 ---
 
-## 📖 How It Works
+# Components Overview
 
-WebRTC normally requires a **signaling server** to help two peers find each other. PeerJS handles this with its own cloud signaling server. Once the connection is established, all video, audio, and data flows **directly between browsers** — no server in the middle.
+## App.js
 
-```
-Step 1: Both users get a unique ID (via PeerJS signaling server)
-Step 2: User A shares their ID with User B
-Step 3: User B enters User A's ID and calls them
-Step 4: Direct peer-to-peer connection established 🎉
-Step 5: Video, audio, and messages flow directly between browsers
-```
+Main application wrapper component.
+
+## PeerToPeerMessaging.js
+
+Main communication interface handling:
+
+* Peer connections
+* Messaging
+* Video calls
+* Speech recognition
+* UI state management
+
+## CallControls.js
+
+Handles:
+
+* Start/stop calls
+* Mute/unmute
+* Camera toggle
+
+## VideoSection.js
+
+Displays:
+
+* Local video stream
+* Remote video stream
+
+## MessageInput.js
+
+Handles:
+
+* Text input
+* Speech-to-text controls
+* Message sending
+
+## MessageList.js
+
+Displays:
+
+* Incoming messages
+* Outgoing messages
+
+## ConnectionRequest.js
+
+Displays incoming connection requests.
+
+## IncomingCallAlert.js
+
+Displays incoming video call requests.
 
 ---
 
-## 📄 License
+# Custom Hooks Overview
 
-This project is open source and available under the [MIT License](LICENSE).
+## usePeer.js
+
+Handles:
+
+* PeerJS initialization
+* Peer ID creation
+* Incoming PeerJS calls
+
+## useConnection.js
+
+Handles:
+
+* Connection requests
+* Connection acceptance/rejection
+* Connection state management
+* Disconnect logic
+
+## useMessaging.js
+
+Handles:
+
+* Sending messages
+* Receiving messages
+* Message history storage
+
+## useVideoCall.js
+
+Handles:
+
+* Starting video calls
+* Answering calls
+* Ending calls
+* Media stream management
+* Mute/camera controls
+
+## useSpeechRecognition.js
+
+Handles:
+
+* Browser speech recognition
+* Speech-to-text conversion
+
+---
+
+# Browser Permissions Required
+
+The application requires permission for:
+
+* Camera access
+* Microphone access
+* Speech recognition access
+
+---
+
+# Browser Compatibility
+
+Best supported browsers:
+
+* Google Chrome
+* Microsoft Edge
+* Brave Browser
+
+Speech recognition may not work properly in some browsers.
+
+---
+
+# Future Improvements
+
+* Group video calls
+* File sharing
+* Screen sharing
+* Better mobile responsiveness
+* Chat timestamps UI
+* Typing indicators
+* Authentication system
+* End-to-end encryption enhancements
+* Dark/Light theme
+
+---
+
+# Author
+
+Made with ❤️ by Brett Cooper
+
+---
+
+# License
+
+This project is currently for learning and development purposes.
