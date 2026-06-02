@@ -51,8 +51,12 @@ function usePeer(localStream, setLocalStream, setRemoteStream, onIncomingCall) {
 
       // Store Peer Instance
       setPeer(peerInstance);
+
+      return () => {
+        peerInstance.destroy();
+      };
     }
-  }, [partyAId]);
+  }, [partyAId, onIncomingCall]);
 
   // Hook Return Values
   return { peer, partyAId, partyBId, setPartyBId };

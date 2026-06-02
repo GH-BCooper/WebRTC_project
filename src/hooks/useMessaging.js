@@ -67,7 +67,7 @@ function useMessaging(peer, partyBId, setRemoteStream) {
   // Incoming Connection Listener
   useEffect(() => {
     if (peer) {
-      peer.on("connection", (conn) => {
+      const handleConnection = (conn) => {
         // Incoming Data Listener
         conn.on("data", (data) => {
           // System Message Handling
@@ -85,9 +85,15 @@ function useMessaging(peer, partyBId, setRemoteStream) {
             { text: data, type: "incoming", time: Date.now() },
           ]);
         });
-      });
+      };
+
+      peer.on("connection", handleConnection);
+
+      return () => {
+        peer.off("connection", handleConnection);
+      };
     }
-  }, [peer]);
+  }, [peer, setRemoteStream]);
 
   // Hook Return Values
   return { messages, sendMessage };

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import "./PeerToPeerMessaging.css";
 import CallControls from "./CallControls";
 import VideoSection from "./VideoSection";
@@ -17,14 +17,17 @@ function PeerToPeerMessaging() {
   // Stream State Management
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "dark";
+  });
 
   // Incoming Call Reference
   const pendingCall = useRef(null);
 
   // Incoming Call Handler
-  function handleIncomingCall(call) {
+  const handleIncomingCall = useCallback((call) => {
     pendingCall.current = call;
-  }
+  }, []);
 
   // Peer Connection Hook
   const { peer, partyAId, partyBId, setPartyBId } = usePeer(
@@ -104,6 +107,23 @@ function PeerToPeerMessaging() {
   const { startSpeechRecognition, stopSpeechRecognition } =
     useSpeechRecognition();
 
+  function toggleTheme() {
+    setTheme((currentTheme) => {
+      const nextTheme = currentTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", nextTheme);
+
+      return nextTheme;
+    });
+  }
+
+  React.useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+
+    return () => {
+      document.documentElement.removeAttribute("data-theme");
+    };
+  }, [theme]);
+
   // Connection Status Helpers
   const callActive = localStream !== null;
 
@@ -111,7 +131,14 @@ function PeerToPeerMessaging() {
 
   // UI Rendering
   return (
-    <div id="container">
+    <div id="container" data-theme={theme}>
+      <button className="theme-toggle" onClick={toggleTheme} type="button">
+        <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
+        <span className="theme-toggle-text">
+          {theme === "dark" ? "Light" : "Dark"}
+        </span>
+      </button>
+
       {/* Incoming Connection Request Popup */}
       {incomingRequest && (
         <ConnectionRequest

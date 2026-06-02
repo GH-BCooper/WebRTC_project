@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Connection Management Hook
 function useConnection(peer, partyBId, setPartyBId) {
@@ -9,11 +9,16 @@ function useConnection(peer, partyBId, setPartyBId) {
   const [yourName, setYourName] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [incomingCallRequest, setIncomingCallRequest] = useState(null);
+  const recipientNameRef = useRef("");
+
+  useEffect(() => {
+    recipientNameRef.current = recipientName;
+  }, [recipientName]);
 
   // Peer Connection Listener
   useEffect(() => {
     if (peer) {
-      peer.on("connection", (conn) => {
+      const handleConnection = (conn) => {
         conn.on("data", (data) => {
           // Connection Request Handler
           if (data.type === "connection-request") {
@@ -41,7 +46,7 @@ function useConnection(peer, partyBId, setPartyBId) {
 
           // Call Rejection Handler
           else if (data.type === "call-rejected") {
-            alert(`${recipientName} rejected your call!`);
+            alert(`${recipientNameRef.current} rejected your call!`);
           }
         });
 
@@ -54,9 +59,15 @@ function useConnection(peer, partyBId, setPartyBId) {
 
           alert("The other person has disconnected!");
         });
-      });
+      };
+
+      peer.on("connection", handleConnection);
+
+      return () => {
+        peer.off("connection", handleConnection);
+      };
     }
-  }, [peer]);
+  }, [peer, setPartyBId]);
 
   // Send Connection Request
   function sendConnectionRequest() {
