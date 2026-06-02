@@ -37,7 +37,9 @@ function usePeer(localStream, setLocalStream, setRemoteStream, onIncomingCall) {
   // PeerJS Connection Setup
   useEffect(() => {
     if (partyAId) {
-      const peerInstance = new Peer(partyAId);
+      const peerInstance = new Peer(partyAId, {
+        debug: 2,
+      });
 
       // Peer Connection Open Handler
       peerInstance.on("open", (id) => {
@@ -47,6 +49,11 @@ function usePeer(localStream, setLocalStream, setRemoteStream, onIncomingCall) {
       // Incoming Call Handler
       peerInstance.on("call", (call) => {
         onIncomingCall(call);
+      });
+
+      // Surface connection issues in production instead of failing silently
+      peerInstance.on("error", (error) => {
+        console.error("PeerJS error:", error);
       });
 
       // Store Peer Instance

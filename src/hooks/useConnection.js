@@ -19,6 +19,10 @@ function useConnection(peer, partyBId, setPartyBId) {
   useEffect(() => {
     if (peer) {
       const handleConnection = (conn) => {
+        conn.on("error", (error) => {
+          console.error("Data connection error:", error);
+        });
+
         conn.on("data", (data) => {
           // Connection Request Handler
           if (data.type === "connection-request") {
@@ -102,6 +106,13 @@ function useConnection(peer, partyBId, setPartyBId) {
 
       setConnectionStatus("pending");
       setActiveConn(conn);
+    });
+
+    conn.on("error", (error) => {
+      console.error("Failed to open connection:", error);
+      alert("Could not connect to the other device. Check the console for the PeerJS error.");
+      setConnectionStatus("idle");
+      setActiveConn(null);
     });
 
     // Connection Data Listener
