@@ -244,6 +244,7 @@ function useConnection(peer, partyBId, setPartyBId) {
     connectionStatus,
     incomingRequest,
     incomingCallRequest,
+    activeConn,
     yourName,
     setYourName,
     recipientName,

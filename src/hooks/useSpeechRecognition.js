@@ -1,63 +1,65 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
+
+// Browser Speech Recognition
+const SpeechRecognition =
+  typeof window !== "undefined"
+    ? window.SpeechRecognition || window.webkitSpeechRecognition
+    : null;
 
 // Speech Recognition Hook
-function useSpeechRecognition() {
-  // Recognition State
-  const [recognition, setRecognition] = useState(null);
+// Converts speech to text and reports the running transcript through onResult.
+function useSpeechRecognition(onResult) {
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
 
-  // Start Speech Recognition
-  function startSpeechRecognition() {
-    if (window.webkitSpeechRecognition) {
-      // Speech Recognition Instance Configuration
-      const recognitionInstance = new window.webkitSpeechRecognition();
+  // Start Listening
+  const start = useCallback(() => {
+    if (!SpeechRecognition) return;
 
-      recognitionInstance.continuous = false;
-      recognitionInstance.lang = "en-US";
-      recognitionInstance.interimResults = false;
-      recognitionInstance.maxAlternatives = 1;
+    const recognition = new SpeechRecognition();
 
-      // Speech Result Handler
-      recognitionInstance.onresult = (event) => {
-        const speechToText = event.results[0][0].transcript;
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = true;
 
-        document.getElementById("message").value = speechToText;
-      };
+    let finalText = "";
 
-      // Recognition End Handler
-      recognitionInstance.onend = () => {
-        document.getElementById("startSpeechBtn").style.display =
-          "inline-block";
+    recognition.onresult = (event) => {
+      let interimText = "";
 
-        document.getElementById("stopSpeechBtn").style.display = "none";
-      };
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const chunk = event.results[i][0].transcript;
 
-      // Recognition Start Handler
-      recognitionInstance.onstart = () => {
-        document.getElementById("startSpeechBtn").style.display = "none";
+        if (event.results[i].isFinal) {
+          finalText += chunk;
+        } else {
+          interimText += chunk;
+        }
+      }
 
-        document.getElementById("stopSpeechBtn").style.display = "inline-block";
-      };
+      onResult((finalText + interimText).trim());
+    };
 
-      // Start Recognition
-      recognitionInstance.start();
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
 
-      // Store Recognition Instance
-      setRecognition(recognitionInstance);
-    } else {
-      // Browser Compatibility Error
-      console.error("Speech recognition is not supported in this browser.");
+    try {
+      recognition.start();
+      recognitionRef.current = recognition;
+      setListening(true);
+    } catch (error) {
+      console.error("Speech recognition could not start:", error);
     }
-  }
+  }, [onResult]);
 
-  // Stop Speech Recognition
-  function stopSpeechRecognition() {
-    if (recognition) {
-      recognition.stop();
-    }
-  }
+  // Stop Listening
+  const stop = useCallback(() => {
+    recognitionRef.current?.stop();
+    setListening(false);
+  }, []);
 
   // Hook Return Values
-  return { startSpeechRecognition, stopSpeechRecognition };
+  return { listening, start, stop, supported: !!SpeechRecognition };
 }
 
 // Export Hook

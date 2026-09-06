@@ -15,45 +15,50 @@ function useVideoCall(
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [currentCall, setCurrentCall] = useState(null);
 
-  // Pending Incoming Call Reference
-  const pendingCall = useRef(null);
+  // Tracks whether we ended the call ourselves, so we don't show
+  // "the other person ended the call" when we pressed stop.
+  const endedByMe = useRef(false);
+
+  // Wire Up A Call Object (shared by start + answer)
+  function attachCallHandlers(call, stream) {
+    setLocalStream(stream);
+    setCurrentCall(call);
+    endedByMe.current = false;
+
+    call.on("stream", (remoteStream) => {
+      setRemoteStream(remoteStream);
+    });
+
+    call.on("close", () => {
+      stream.getTracks().forEach((track) => track.stop());
+      setRemoteStream(null);
+      setLocalStream(null);
+      setCurrentCall(null);
+
+      if (!endedByMe.current) {
+        alert("The other person ended the call.");
+      }
+    });
+  }
 
   // Start Video Call
   function startVideoCall() {
     if (!partyBId) {
-      alert("Please enter the recipient's ID first!");
+      alert("Please connect to someone first!");
       return;
     }
 
-    // Send Call Request
     sendCallRequest(yourName);
 
-    // Access Media Devices And Start Call
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
-        setLocalStream(stream);
-
         const call = peer.call(partyBId, stream);
-
-        setCurrentCall(call);
-
-        // Remote Stream Listener
-        call.on("stream", (remoteStream) => {
-          setRemoteStream(remoteStream);
-        });
-
-        // Call Close Listener
-        call.on("close", () => {
-          setRemoteStream(null);
-          setLocalStream(null);
-          setCurrentCall(null);
-
-          alert("The other person ended the call!");
-        });
+        attachCallHandlers(call, stream);
       })
       .catch((error) => {
-        console.error("Error accessing media devices.", error);
+        console.error("Could not access camera/microphone:", error);
+        alert("Could not access your camera or microphone.");
       });
   }
 
@@ -62,33 +67,21 @@ function useVideoCall(
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
-        setLocalStream(stream);
-
         call.answer(stream);
-
-        // Remote Stream Listener
-        call.on("stream", (remoteStream) => {
-          setRemoteStream(remoteStream);
-        });
-
-        // Call Close Listener
-        call.on("close", () => {
-          setRemoteStream(null);
-          setLocalStream(null);
-
-          alert("The other person ended the call!");
-        });
+        attachCallHandlers(call, stream);
       })
       .catch((error) => {
-        console.error("Error accessing media devices.", error);
+        console.error("Could not access camera/microphone:", error);
+        alert("Could not access your camera or microphone.");
       });
   }
 
   // Stop Video Call
   function stopVideoCall() {
+    endedByMe.current = true;
+
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop());
-
       setLocalStream(null);
     }
 
@@ -107,7 +100,7 @@ function useVideoCall(
         track.enabled = !track.enabled;
       });
 
-      setIsMuted(!isMuted);
+      setIsMuted((muted) => !muted);
     }
   }
 
@@ -118,7 +111,7 @@ function useVideoCall(
         track.enabled = !track.enabled;
       });
 
-      setIsCameraOff(!isCameraOff);
+      setIsCameraOff((off) => !off);
     }
   }
 
@@ -131,7 +124,6 @@ function useVideoCall(
     isMuted,
     toggleCamera,
     isCameraOff,
-    pendingCall,
   };
 }
 

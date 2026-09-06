@@ -1,30 +1,32 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./PeerToPeerMessaging.css";
 import CallControls from "./CallControls";
 import VideoSection from "./VideoSection";
 import MessageInput from "./MessageInput";
+import MessageList from "./MessageList";
+import ConnectionRequest from "./ConnectionRequest";
+import IncomingCallAlert from "./IncomingCallAlert";
+import AIPanel from "./AIPanel";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import useMessaging from "../hooks/useMessaging";
 import useVideoCall from "../hooks/useVideoCall";
 import usePeer from "../hooks/usePeer";
 import useConnection from "../hooks/useConnection";
-import MessageList from "./MessageList";
-import ConnectionRequest from "./ConnectionRequest";
-import IncomingCallAlert from "./IncomingCallAlert";
+import useLiveCaptions from "../hooks/useLiveCaptions";
 
 // Peer To Peer Messaging Component
 function PeerToPeerMessaging() {
-  // Stream State Management
+  // Stream + UI State
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "dark";
-  });
+  const [draft, setDraft] = useState("");
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("theme") || "dark",
+  );
 
   // Incoming Call Reference
   const pendingCall = useRef(null);
 
-  // Incoming Call Handler
   const handleIncomingCall = useCallback((call) => {
     pendingCall.current = call;
   }, []);
@@ -42,6 +44,7 @@ function PeerToPeerMessaging() {
     connectionStatus,
     incomingRequest,
     incomingCallRequest,
+    activeConn,
     yourName,
     setYourName,
     recipientName,
@@ -73,63 +76,88 @@ function PeerToPeerMessaging() {
     yourName,
   );
 
-  // Stop Call Handler
-  function handleStopCall() {
-    stopVideoCall();
-  }
+  // Messaging + Speech + Captions Hooks
+  const { messages, sendMessage } = useMessaging(activeConn);
+  const speech = useSpeechRecognition(setDraft);
 
-  // Accept Incoming Call Handler
+  const callActive = localStream !== null;
+  const captions = useLiveCaptions(activeConn, callActive);
+
+  // Call Handlers
   function handleAcceptCall() {
     acceptCallRequest();
 
     if (pendingCall.current) {
       answerCall(pendingCall.current);
-
       pendingCall.current = null;
     }
   }
 
-  // Reject Incoming Call Handler
   function handleRejectCall() {
     rejectCallRequest();
-
     pendingCall.current = null;
   }
 
-  // Messaging Hook
-  const { messages, sendMessage } = useMessaging(
-    peer,
-    partyBId,
-    setRemoteStream,
-  );
+  // Message Handlers
+  function handleSend() {
+    if (sendMessage(draft)) {
+      setDraft("");
+    }
+  }
 
-  // Speech Recognition Hook
-  const { startSpeechRecognition, stopSpeechRecognition } =
-    useSpeechRecognition();
+  function toggleSpeech() {
+    if (speech.listening) {
+      speech.stop();
+    } else {
+      speech.start();
+    }
+  }
 
+  // Theme
   function toggleTheme() {
-    setTheme((currentTheme) => {
-      const nextTheme = currentTheme === "dark" ? "light" : "dark";
-      localStorage.setItem("theme", nextTheme);
-
-      return nextTheme;
+    setTheme((current) => {
+      const next = current === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      return next;
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.documentElement.dataset.theme = theme;
-
-    return () => {
-      document.documentElement.removeAttribute("data-theme");
-    };
   }, [theme]);
-
-  // Connection Status Helpers
-  const callActive = localStream !== null;
 
   const isConnected = connectionStatus === "connected";
 
-  // UI Rendering
+  // Shared messaging + AI block (same in and out of a call)
+  const conversation = (
+    <>
+      <MessageInput
+        value={draft}
+        onChange={setDraft}
+        onSend={handleSend}
+        listening={speech.listening}
+        onToggleSpeech={toggleSpeech}
+        speechSupported={speech.supported}
+      />
+
+      <AIPanel
+        messages={messages}
+        yourName={yourName}
+        recipientName={recipientName}
+        draft={draft}
+        onInsert={setDraft}
+      />
+
+      {messages.length > 0 && (
+        <MessageList
+          messages={messages}
+          yourName={yourName}
+          recipientName={recipientName}
+        />
+      )}
+    </>
+  );
+
   return (
     <div id="container" data-theme={theme}>
       <button className="theme-toggle" onClick={toggleTheme} type="button">
@@ -139,7 +167,7 @@ function PeerToPeerMessaging() {
         </span>
       </button>
 
-      {/* Incoming Connection Request Popup */}
+      {/* Popups */}
       {incomingRequest && (
         <ConnectionRequest
           fromId={incomingRequest.fromId}
@@ -149,7 +177,6 @@ function PeerToPeerMessaging() {
         />
       )}
 
-      {/* Incoming Call Alert Popup */}
       {incomingCallRequest && (
         <IncomingCallAlert
           fromName={incomingCallRequest.fromName}
@@ -158,18 +185,13 @@ function PeerToPeerMessaging() {
         />
       )}
 
-      {/* Application Heading */}
-      {isConnected ? (
-        <h1>
-          WebRTC <span className="small-text">(using PeerJS!)</span>
-        </h1>
-      ) : (
-        <h1>
-          Welcome to WebRTC <span className="small-text">(using PeerJS!)</span>
-        </h1>
-      )}
+      {/* Heading */}
+      <h1>
+        {isConnected ? "WebRTC" : "Welcome to WebRTC"}{" "}
+        <span className="small-text">(using PeerJS!)</span>
+      </h1>
 
-      {/* User Connection Information */}
+      {/* Connection Info */}
       <p>
         {isConnected ? (
           <>
@@ -184,35 +206,36 @@ function PeerToPeerMessaging() {
         )}
       </p>
 
-      {/* Idle Connection State */}
+      {/* Idle State */}
       {connectionStatus === "idle" && (
         <>
-          <label>Your Name:</label>
-
+          <label htmlFor="yourName">Your Name:</label>
           <input
             type="text"
+            id="yourName"
             value={yourName}
-            onChange={(e) => setYourName(e.target.value)}
+            onChange={(event) => setYourName(event.target.value)}
             placeholder="Enter your name *"
           />
 
           <label htmlFor="partyBId">Recipient's ID:</label>
-
           <input
             type="text"
             id="partyBId"
             value={partyBId}
-            onChange={(e) => setPartyBId(e.target.value)}
+            onChange={(event) => setPartyBId(event.target.value)}
             placeholder="Enter the recipient's ID *"
           />
 
-          <button onClick={sendConnectionRequest}>Connect</button>
+          <button onClick={sendConnectionRequest} type="button">
+            Connect
+          </button>
         </>
       )}
 
-      {/* Pending Connection State */}
+      {/* Pending State */}
       {connectionStatus === "pending" && (
-        <p style={{ color: "#007bff" }}>
+        <p style={{ color: "var(--title)" }}>
           ⏳ Waiting for {partyBId} to accept...
         </p>
       )}
@@ -220,72 +243,44 @@ function PeerToPeerMessaging() {
       {/* Connected State */}
       {isConnected && (
         <>
-          {/* Disconnect Button */}
           {!callActive && (
             <button
               onClick={() => disconnect(yourName)}
-              style={{ backgroundColor: "#dc3545" }}
+              style={{ backgroundColor: "var(--danger)" }}
+              type="button"
             >
               Disconnect
             </button>
           )}
 
-          {/* Active Call Layout */}
-          {callActive ? (
-            <>
-              <VideoSection
-                localStream={localStream}
-                remoteStream={remoteStream}
-                yourName={yourName}
-                recipientName={recipientName}
-              />
-
-              <CallControls
-                startVideoCall={startVideoCall}
-                stopVideoCall={handleStopCall}
-                toggleMute={toggleMute}
-                isMuted={isMuted}
-                toggleCamera={toggleCamera}
-                isCameraOff={isCameraOff}
-                localStream={localStream}
-              />
-
-              <MessageInput
-                sendMessage={sendMessage}
-                startSpeechRecognition={startSpeechRecognition}
-                stopSpeechRecognition={stopSpeechRecognition}
-              />
-
-              {messages.length > 0 && <MessageList messages={messages} />}
-            </>
-          ) : (
-            <>
-              {/* Messaging Section */}
-              <MessageInput
-                sendMessage={sendMessage}
-                startSpeechRecognition={startSpeechRecognition}
-                stopSpeechRecognition={stopSpeechRecognition}
-              />
-
-              {/* Call Controls */}
-              <CallControls
-                startVideoCall={startVideoCall}
-                stopVideoCall={handleStopCall}
-                toggleMute={toggleMute}
-                isMuted={isMuted}
-                toggleCamera={toggleCamera}
-                isCameraOff={isCameraOff}
-                localStream={localStream}
-              />
-
-              {/* Message History */}
-              {messages.length > 0 && <MessageList messages={messages} />}
-            </>
+          {callActive && (
+            <VideoSection
+              localStream={localStream}
+              remoteStream={remoteStream}
+              yourName={yourName}
+              recipientName={recipientName}
+              myCaption={captions.myCaption}
+              peerCaption={captions.peerCaption}
+            />
           )}
+
+          <CallControls
+            localStream={localStream}
+            startVideoCall={startVideoCall}
+            stopVideoCall={stopVideoCall}
+            toggleMute={toggleMute}
+            isMuted={isMuted}
+            toggleCamera={toggleCamera}
+            isCameraOff={isCameraOff}
+            captionsSupported={captions.supported}
+            captionsEnabled={captions.enabled}
+            toggleCaptions={captions.toggle}
+          />
+
+          {conversation}
         </>
       )}
 
-      {/* Footer Section */}
       <footer id="footer">© 2026 Made with ❤️ by Brett Cooper</footer>
     </div>
   );

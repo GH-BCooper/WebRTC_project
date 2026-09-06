@@ -1,99 +1,54 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // Messaging Hook
-function useMessaging(peer, partyBId, setRemoteStream) {
+// Sends and receives chat messages over the single active peer data connection.
+function useMessaging(activeConn) {
   // Message State Management
   const [messages, setMessages] = useState([]);
 
-  // Send Message Function
-  function sendMessage() {
-    // Peer Connection Validation
-    if (!peer) {
-      alert("Connection not ready yet. Please wait!");
-      return;
-    }
-
-    // Recipient Validation
-    if (!partyBId) {
-      alert("Please enter the recipient's ID first!");
-      return;
-    }
-
-    // Message Input Retrieval
-    const messageInput = document.getElementById("message");
-
-    const message = messageInput.value.trim();
-
-    // Empty Message Validation
-    if (!message) {
-      alert("Please enter a message first!");
-      return;
-    }
-
-    // Peer Message Sending Logic
-    if (peer && partyBId) {
-      try {
-        const conn = peer.connect(partyBId);
-
-        // Connection Validation
-        if (!conn) {
-          alert(
-            "Could not connect to recipient. Please check the ID and try again.",
-          );
-
-          return;
-        }
-
-        // Connection Open Handler
-        conn.on("open", () => {
-          conn.send(message);
-
-          // Store Outgoing Message
-          setMessages((prev) => [
-            ...prev,
-            { text: message, type: "outgoing", time: Date.now() },
-          ]);
-        });
-
-        // Clear Message Input
-        messageInput.value = "";
-      } catch (error) {
-        // Error Handling
-        alert("Error sending message: " + error.message);
-      }
-    }
-  }
-
-  // Incoming Connection Listener
+  // Incoming Message Listener
   useEffect(() => {
-    if (peer) {
-      const handleConnection = (conn) => {
-        // Incoming Data Listener
-        conn.on("data", (data) => {
-          // System Message Handling
-          if (data && data.type) {
-            if (data.type === "call-ended") {
-              setRemoteStream(null);
-            }
+    if (!activeConn) return;
 
-            return;
-          }
+    const handleData = (data) => {
+      if (data && data.type === "chat") {
+        setMessages((prev) => [
+          ...prev,
+          { text: data.text, type: "incoming", time: data.time || Date.now() },
+        ]);
+      }
+    };
 
-          // Store Incoming Message
-          setMessages((prev) => [
-            ...prev,
-            { text: data, type: "incoming", time: Date.now() },
-          ]);
-        });
-      };
+    activeConn.on("data", handleData);
 
-      peer.on("connection", handleConnection);
+    return () => {
+      activeConn.off("data", handleData);
+    };
+  }, [activeConn]);
 
-      return () => {
-        peer.off("connection", handleConnection);
-      };
-    }
-  }, [peer, setRemoteStream]);
+  // Send Message
+  const sendMessage = useCallback(
+    (text) => {
+      const message = (text || "").trim();
+
+      if (!message) return false;
+
+      if (!activeConn || activeConn.open === false) {
+        alert("You are not connected yet. Please connect first!");
+        return false;
+      }
+
+      activeConn.send({ type: "chat", text: message, time: Date.now() });
+
+      setMessages((prev) => [
+        ...prev,
+        { text: message, type: "outgoing", time: Date.now() },
+      ]);
+
+      return true;
+    },
+    [activeConn],
+  );
 
   // Hook Return Values
   return { messages, sendMessage };

@@ -2,41 +2,50 @@ import React from "react";
 
 // Call Controls Component
 function CallControls(props) {
-  // Mute And Camera Control Buttons
-  let muteAndCameraButtons = null;
+  const {
+    localStream,
+    startVideoCall,
+    stopVideoCall,
+    toggleMute,
+    isMuted,
+    toggleCamera,
+    isCameraOff,
+    captionsSupported,
+    captionsEnabled,
+    toggleCaptions,
+  } = props;
 
-  // Active Call Controls
-  if (props.localStream) {
-    muteAndCameraButtons = (
-      <>
-        {/* Mute Toggle Button */}
-        <button onClick={props.toggleMute}>
-          {props.isMuted ? "Unmute 🔊" : "Mute 🔇"}
-        </button>
-
-        {/* Camera Toggle Button */}
-        <button onClick={props.toggleCamera}>
-          {props.isCameraOff ? "Camera On 📷" : "Camera Off 📵"}
-        </button>
-      </>
-    );
-  }
-
-  // UI Rendering
   return (
     <div>
-      {/* Start Video Call Button */}
-      {!props.localStream && (
-        <button onClick={props.startVideoCall}>Start Video Call</button>
+      {/* Start / Stop Call */}
+      {!localStream ? (
+        <button onClick={startVideoCall} type="button">
+          Start Video Call 📹
+        </button>
+      ) : (
+        <button onClick={stopVideoCall} type="button">
+          Stop Video Call
+        </button>
       )}
 
-      {/* Stop Video Call Button */}
-      {props.localStream && (
-        <button onClick={props.stopVideoCall}>Stop Video Call</button>
-      )}
+      {/* Active Call Controls */}
+      {localStream && (
+        <>
+          <button onClick={toggleMute} type="button">
+            {isMuted ? "Unmute 🔊" : "Mute 🔇"}
+          </button>
 
-      {/* Active Call Action Buttons */}
-      {muteAndCameraButtons}
+          <button onClick={toggleCamera} type="button">
+            {isCameraOff ? "Camera On 📷" : "Camera Off 📵"}
+          </button>
+
+          {captionsSupported && (
+            <button onClick={toggleCaptions} type="button">
+              {captionsEnabled ? "Captions Off 💬" : "Captions On 💬"}
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -1,5 +1,8 @@
 # WebRTC using PeerJS
 
+> **Version 2 is here.** See [versionTwo.md](versionTwo.md) for the AI features
+> (AI assistant, live call captions), bug fixes, and the full tech list.
+
 A real-time peer-to-peer communication application built using React, WebRTC, and PeerJS.
 
 This project allows two users to connect directly using unique Peer IDs and communicate through:
@@ -83,17 +86,20 @@ The application uses PeerJS on top of WebRTC to simplify peer-to-peer communicat
 src/
 │
 ├── components/
-│   ├── App.js
-│   ├── CallControls.js
-│   ├── ConnectionRequest.js
-│   ├── IncomingCallAlert.js
-│   ├── MessageInput.js
-│   ├── MessageList.js
-│   ├── PeerToPeerMessaging.js
-│   └── VideoSection.js
+│   ├── App.jsx
+│   ├── AIPanel.jsx
+│   ├── CallControls.jsx
+│   ├── ConnectionRequest.jsx
+│   ├── IncomingCallAlert.jsx
+│   ├── MessageInput.jsx
+│   ├── MessageList.jsx
+│   ├── PeerToPeerMessaging.jsx
+│   └── VideoSection.jsx
 │
 ├── hooks/
+│   ├── useAI.js
 │   ├── useConnection.js
+│   ├── useLiveCaptions.js
 │   ├── useMessaging.js
 │   ├── usePeer.js
 │   ├── useSpeechRecognition.js
