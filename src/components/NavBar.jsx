@@ -4,7 +4,7 @@ import useTheme from "../hooks/useTheme";
 
 // Navigation Links
 const LINKS = [
-  { to: "/", label: "Home", end: true },
+  { to: "/sessions", label: "Sessions" },
   { to: "/meet", label: "Meet" },
   { to: "/assistant", label: "Assistant" },
   { to: "/agent", label: "Agent" },
@@ -21,7 +21,7 @@ function NavBar() {
     <>
       <nav className="navbar">
         <NavLink to="/" className="navbar-brand" end>
-          <span className="brand-dot" aria-hidden="true" /> WebRTC<span className="brand-accent">+AI</span>
+          <span className="brand-dot" aria-hidden="true" /> Office<span className="brand-accent">Hours</span>
         </NavLink>
 
         <button

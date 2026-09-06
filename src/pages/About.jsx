@@ -7,37 +7,60 @@ function About() {
     <div className="page about">
       <header className="page-head">
         <span className="page-kicker">The project</span>
-        <h1>About this project</h1>
+        <h1>About OfficeHours</h1>
       </header>
 
       <p>
-        A personal learning project exploring <strong>WebRTC</strong>,{" "}
-        <strong>React</strong> and the <strong>Anthropic API</strong>. Two
-        browsers connect directly using PeerJS — messages, video, screen shares
-        and captions all travel peer to peer. There is no backend.
+        OfficeHours is a small, browser-only platform for <strong>1:1 calls
+        that leave a record behind</strong> — mentoring, tutoring, consults,
+        interviews. Two browsers connect directly with{" "}
+        <strong>WebRTC / PeerJS</strong>; when the call ends, the{" "}
+        <strong>Anthropic API</strong> turns the conversation into a recap. It is
+        built with <strong>React</strong> and has no backend.
       </p>
 
-      <h2>How a call works</h2>
+      <h2>Why it exists</h2>
+      <p>
+        The most valuable conversations people have are one-to-one, and they are
+        also the ones that vanish the fastest — no transcript, no decisions
+        captured, no follow-up. Big meeting tools need accounts and downloads and
+        still don&apos;t help with that last part. OfficeHours is the smallest
+        thing that does: a room you can share with a link, and an AI scribe.
+      </p>
+
+      <h2>How a session works</h2>
       <ol>
-        <li>Each browser gets a short random Peer ID (saved in localStorage).</li>
-        <li>You share your ID or an invite link with the other person.</li>
+        <li>
+          On <strong>Sessions</strong>, you add a topic and a short agenda. It is
+          saved in this browser and gets a short id.
+        </li>
+        <li>
+          You share the room link (<code>/meet?s=&lt;id&gt;</code>). The other
+          person opens it — no sign-up, no install.
+        </li>
         <li>
           One side sends a connection request; the other accepts. A single data
-          connection then carries chat, typing pings and captions.
+          connection then carries chat, typing pings and captions; a video call
+          adds a media stream on top.
         </li>
-        <li>A video call adds a WebRTC media stream on top of that connection.</li>
+        <li>
+          During or after the call, <strong>Generate recap</strong> sends the
+          topic, agenda and chat transcript to Claude, which returns a summary,
+          an action-item checklist and a follow-up message. Saving it stores the
+          recap back on the session.
+        </li>
       </ol>
 
-      <h2>Three kinds of AI</h2>
+      <h2>The AI toolkit</h2>
       <ul>
         <li>
-          <strong>Assistant</strong> — token-streaming chat with selectable
-          personas, saved history and image attachments.
+          <strong>Assistant</strong> — token-streaming chat with personas, saved
+          history and image attachments (prep for a session).
         </li>
         <li>
-          <strong>Agent</strong> — an agentic tool-use loop: Claude calls real
-          browser tools (clock, calculator, theme, invite links, notes) and you
-          watch each step.
+          <strong>Agent</strong> — a tool-use loop: Claude calls real browser
+          tools (clock, calculator, theme, invite links, notes) and you watch
+          each step.
         </li>
         <li>
           <strong>Vision</strong> — upload an image and ask Claude about it.
@@ -50,24 +73,26 @@ function About() {
         <li>WebRTC + PeerJS for peer-to-peer media and data</li>
         <li>Web Speech API for dictation and live captions</li>
         <li>getDisplayMedia for screen sharing</li>
-        <li>@anthropic-ai/sdk (Claude) — streaming, tool use and vision</li>
+        <li>@anthropic-ai/sdk (Claude) — streaming, tool use, vision and the recap</li>
         <li>Plain CSS with custom properties for theming</li>
       </ul>
 
       <h2>Privacy</h2>
       <p>
-        There is no backend. Your Anthropic API key is stored only in this
-        browser and is sent directly to Anthropic. That is fine for a demo but
-        not for production — a real app would proxy AI calls through a server.
+        There is no backend. Your sessions, recaps and Anthropic API key are
+        stored only in this browser; AI requests go straight from your browser to
+        Anthropic. That is fine for a learning demo but not for production — a
+        real app would proxy AI calls through a server and store sessions for
+        both participants.
       </p>
 
       <p>
-        Full changelog: <code>versionFour.md</code>, <code>versionThree.md</code>{" "}
-        and <code>versionTwo.md</code> in the repo.
+        Full changelog: <code>versionFive.md</code> (and <code>versionFour.md</code>{" "}
+        … <code>versionTwo.md</code>) in the repo.
       </p>
 
-      <Link className="btn" to="/meet">
-        Start a meeting →
+      <Link className="btn" to="/sessions">
+        Plan a session →
       </Link>
     </div>
   );

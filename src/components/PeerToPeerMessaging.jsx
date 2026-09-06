@@ -7,6 +7,7 @@ import MessageList from "./MessageList";
 import ConnectionRequest from "./ConnectionRequest";
 import IncomingCallAlert from "./IncomingCallAlert";
 import AIPanel from "./AIPanel";
+import SessionRecap from "./SessionRecap";
 import useSpeechRecognition from "../hooks/useSpeechRecognition";
 import useMessaging from "../hooks/useMessaging";
 import useVideoCall from "../hooks/useVideoCall";
@@ -15,10 +16,10 @@ import useConnection from "../hooks/useConnection";
 import useLiveCaptions from "../hooks/useLiveCaptions";
 import { playBeep } from "../lib/sound";
 
-const APP_TITLE = "WebRTC + AI (PeerJS)";
+const APP_TITLE = "OfficeHours";
 
 // Peer To Peer Messaging Component
-function PeerToPeerMessaging({ initialRecipientId = "" }) {
+function PeerToPeerMessaging({ initialRecipientId = "", session = null }) {
   // Stream + UI State
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
@@ -65,6 +66,12 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRecipientId]);
+
+  // Pre-fill your name from the session's host (once).
+  useEffect(() => {
+    if (session?.hostName) setYourName(session.hostName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
 
   // Video Call Hook
   const {
@@ -155,7 +162,9 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
     });
   }
 
-  const inviteLink = `${window.location.origin}/meet?peer=${partyAId}`;
+  const inviteLink = session
+    ? `${window.location.origin}/meet?s=${session.id}&peer=${partyAId}`
+    : `${window.location.origin}/meet?peer=${partyAId}`;
   const isConnected = connectionStatus === "connected";
 
   // Shared messaging + AI block
@@ -171,7 +180,7 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
       />
 
       <p className="typing-line">
-        {peerTyping ? `${recipientName || "They"} are typing…` : ""}
+        {peerTyping ? `${recipientName || "They"} ${recipientName ? "is" : "are"} typing…` : ""}
       </p>
 
       <AIPanel
@@ -217,6 +226,15 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
         {isConnected ? "You're connected" : "Start a meeting"}{" "}
         <span className="small-text">(WebRTC + PeerJS)</span>
       </h1>
+
+      {/* Session context (when this room was opened from a saved session) */}
+      {session && (
+        <div className="room-topic">
+          <span className="page-kicker">Session</span>
+          <strong>{session.topic}</strong>
+          {session.agenda && <p>{session.agenda}</p>}
+        </div>
+      )}
 
       {/* Connection Info */}
       <p>
@@ -323,6 +341,16 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
 
           {conversation}
         </>
+      )}
+
+      {/* Recap — available during and after the call so nothing is lost */}
+      {(session || messages.length > 0) && (
+        <SessionRecap
+          session={session}
+          messages={messages}
+          yourName={yourName}
+          recipientName={recipientName}
+        />
       )}
 
       <footer id="footer">© 2026 Made with ❤️ by Brett Cooper</footer>

@@ -378,6 +378,25 @@ function useAI() {
     [ask],
   );
 
+  // Helper: Turn a finished session into a shareable record.
+  // `context` is a plain-text blob: topic, agenda and the chat transcript.
+  const sessionRecap = useCallback(
+    (context) =>
+      ask(
+        [
+          "You are a meeting scribe for a 1:1 session (mentoring / consulting / tutoring).",
+          "From the topic, agenda and transcript, write a short record in Markdown with exactly these three sections:",
+          "## Summary — 3-5 bullet points of what was discussed and decided.",
+          "## Action items — a Markdown checklist ('- [ ] ...'), each with an owner if it's clear. Write 'None.' if there are none.",
+          "## Follow-up message — 2-4 sentences the host could send the other person afterward.",
+          "Be concrete. Do not invent details that aren't supported by the transcript.",
+        ].join("\n"),
+        context,
+        900,
+      ),
+    [ask],
+  );
+
   // Helper: Pull action items out of a conversation
   const actionItems = useCallback(
     (transcript) =>
@@ -410,6 +429,7 @@ function useAI() {
     rewrite,
     translate,
     actionItems,
+    sessionRecap,
   };
 }
 

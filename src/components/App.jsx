@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "../App.css";
 import NavBar from "./NavBar";
 import Home from "../pages/Home";
+import Sessions from "../pages/Sessions";
 import Meet from "../pages/Meet";
 import Assistant from "../pages/Assistant";
 import Agent from "../pages/Agent";
@@ -17,6 +18,7 @@ function App() {
       <main className="App">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/sessions" element={<Sessions />} />
           <Route path="/meet" element={<Meet />} />
           <Route path="/assistant" element={<Assistant />} />
           <Route path="/agent" element={<Agent />} />

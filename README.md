@@ -1,24 +1,30 @@
-# WebRTC using PeerJS
+# OfficeHours — 1:1 calls that remember what happened
 
-> **Version 4 is here.** See [versionFour.md](versionFour.md) — a tool-using AI
-> **agent** (`/agent`), **image understanding** (`/vision`), an upgraded
-> streaming assistant (personas, saved history, stop, image attach), **screen
-> sharing** in calls, and a colourful redesign.
-> [versionThree.md](versionThree.md) covers multi-page routing + streaming chat;
+> **Version 5 is here.** See [versionFive.md](versionFive.md) — the whole project
+> is now wrapped in **OfficeHours**, a browser-only platform for one-to-one
+> sessions (mentoring, tutoring, consults, interviews) with an **AI scribe**:
+> plan a session, share a link, talk peer-to-peer, and get an AI-written
+> **recap + action items** saved to your session history.
+> [versionFour.md](versionFour.md) added the tool-using agent, vision and screen
+> sharing; [versionThree.md](versionThree.md) multi-page routing + streaming chat;
 > [versionTwo.md](versionTwo.md) the earlier AI assistant and bug fixes.
 
-A real-time peer-to-peer communication application built using React, WebRTC, and PeerJS,
-with three kinds of AI (streaming chat, an agentic tool-use loop, and vision) layered on top.
+A real-time peer-to-peer communication platform built with React, WebRTC and PeerJS,
+with Claude layered on top as a meeting scribe plus three AI playgrounds.
 
-This project allows two users to connect directly using unique Peer IDs and communicate through:
+**The problem it solves:** the most valuable conversations are one-to-one, and they
+vanish the fastest — no transcript, no decisions captured, no follow-up. OfficeHours
+is the smallest tool that fixes that: a room you share with a link, and an AI recap.
 
+Two users connect directly using unique Peer IDs and communicate through:
+
+* A planned **session** (topic + agenda) with a shareable room link
 * Real-time text messaging
 * Video calling + screen sharing
-* Audio controls
-* Camera controls
-* Speech-to-text messaging
-* Connection request handling
-* Incoming call alerts
+* Audio + camera controls
+* Speech-to-text messaging and shared live captions
+* Connection request handling + incoming call alerts
+* An **AI session recap** (summary, action items, follow-up message)
 * An AI assistant, AI agent and image analysis
 
 The application uses PeerJS on top of WebRTC to simplify peer-to-peer communication between browsers.
@@ -103,30 +109,33 @@ src/
 │   ├── MessageList.jsx
 │   ├── PeerToPeerMessaging.jsx
 │   ├── PeerToPeerMessaging.css
+│   ├── SessionRecap.jsx     # AI recap panel shown inside a room
 │   └── VideoSection.jsx
 │
 ├── pages/
-│   ├── Home.jsx
-│   ├── Meet.jsx
-│   ├── Assistant.jsx       # streaming chat (personas, history, vision)
-│   ├── Agent.jsx           # agentic tool-use loop
-│   ├── Vision.jsx          # image understanding
+│   ├── Home.jsx             # OfficeHours landing (problem → solution)
+│   ├── Sessions.jsx         # dashboard: plan a session, session history
+│   ├── Meet.jsx             # the room (?s=<id> loads a session)
+│   ├── Assistant.jsx        # streaming chat (personas, history, vision)
+│   ├── Agent.jsx            # agentic tool-use loop
+│   ├── Vision.jsx           # image understanding
 │   └── About.jsx
 │
 ├── hooks/
-│   ├── useAI.js            # streaming + tool use + vision + helpers
+│   ├── useAI.js             # streaming + tool use + vision + sessionRecap + helpers
 │   ├── useTheme.js
 │   ├── useConnection.js
 │   ├── useLiveCaptions.js
 │   ├── useMessaging.js
 │   ├── usePeer.js
 │   ├── useSpeechRecognition.js
-│   └── useVideoCall.js     # + screen sharing
+│   └── useVideoCall.js      # + screen sharing
 │
 ├── lib/
 │   ├── sound.js
-│   ├── markdown.js         # tiny safe Markdown renderer
-│   └── agentTools.js       # agent tool schemas + browser runners
+│   ├── markdown.js          # tiny safe Markdown renderer
+│   ├── agentTools.js        # agent tool schemas + browser runners
+│   └── sessions.js          # OfficeHours session store (localStorage)
 │
 ├── App.css
 ├── index.css
@@ -336,15 +345,18 @@ Speech recognition may not work properly in some browsers.
 
 # Future Improvements
 
+* Shared recap (both participants get it, not just the host)
+* Server-side session store + auth (so sessions survive a cleared browser)
+* Calendar / scheduling with reminders
 * Group video calls
 * File sharing over the data channel
 * TURN server for calls behind strict NATs
 * Server-side proxy for the AI key (so it isn't in the browser)
-* Authentication system
 
-Done in v2/v3/v4: dark/light theme, chat timestamps, typing indicators,
+Done in v2/v3/v4/v5: dark/light theme, chat timestamps, typing indicators,
 live captions, AI assistant, multi-page routing, invite links, streaming chat,
-**a tool-using AI agent**, **image understanding (vision)**, **screen sharing**.
+a tool-using AI agent, image understanding (vision), screen sharing,
+**the OfficeHours session wrapper + AI recap**.
 
 ---
 
