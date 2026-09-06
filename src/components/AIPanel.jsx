@@ -47,6 +47,15 @@ function AIPanel(props) {
     }
   }
 
+  async function handleActionItems() {
+    setSummary("");
+    try {
+      setSummary(await ai.actionItems(transcript()));
+    } catch (error) {
+      /* handled */
+    }
+  }
+
   async function handleSmartReplies() {
     setReplies([]);
     try {
@@ -131,6 +140,14 @@ function AIPanel(props) {
                   type="button"
                 >
                   Suggest replies
+                </button>
+
+                <button
+                  onClick={handleActionItems}
+                  disabled={ai.busy || noHistory}
+                  type="button"
+                >
+                  Action items
                 </button>
               </div>
 

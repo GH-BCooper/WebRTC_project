@@ -1,21 +1,25 @@
 # WebRTC using PeerJS
 
-> **Version 3 is here.** See [versionThree.md](versionThree.md) — multi-page app
-> (React Router), a streaming AI chat page, invite links, typing indicator and
-> notification alerts. [versionTwo.md](versionTwo.md) covers the earlier AI
-> assistant and bug fixes.
+> **Version 4 is here.** See [versionFour.md](versionFour.md) — a tool-using AI
+> **agent** (`/agent`), **image understanding** (`/vision`), an upgraded
+> streaming assistant (personas, saved history, stop, image attach), **screen
+> sharing** in calls, and a colourful redesign.
+> [versionThree.md](versionThree.md) covers multi-page routing + streaming chat;
+> [versionTwo.md](versionTwo.md) the earlier AI assistant and bug fixes.
 
-A real-time peer-to-peer communication application built using React, WebRTC, and PeerJS.
+A real-time peer-to-peer communication application built using React, WebRTC, and PeerJS,
+with three kinds of AI (streaming chat, an agentic tool-use loop, and vision) layered on top.
 
 This project allows two users to connect directly using unique Peer IDs and communicate through:
 
 * Real-time text messaging
-* Video calling
+* Video calling + screen sharing
 * Audio controls
 * Camera controls
 * Speech-to-text messaging
 * Connection request handling
 * Incoming call alerts
+* An AI assistant, AI agent and image analysis
 
 The application uses PeerJS on top of WebRTC to simplify peer-to-peer communication between browsers.
 
@@ -104,21 +108,25 @@ src/
 ├── pages/
 │   ├── Home.jsx
 │   ├── Meet.jsx
-│   ├── Assistant.jsx
+│   ├── Assistant.jsx       # streaming chat (personas, history, vision)
+│   ├── Agent.jsx           # agentic tool-use loop
+│   ├── Vision.jsx          # image understanding
 │   └── About.jsx
 │
 ├── hooks/
-│   ├── useAI.js
+│   ├── useAI.js            # streaming + tool use + vision + helpers
 │   ├── useTheme.js
 │   ├── useConnection.js
 │   ├── useLiveCaptions.js
 │   ├── useMessaging.js
 │   ├── usePeer.js
 │   ├── useSpeechRecognition.js
-│   └── useVideoCall.js
+│   └── useVideoCall.js     # + screen sharing
 │
 ├── lib/
-│   └── sound.js
+│   ├── sound.js
+│   ├── markdown.js         # tiny safe Markdown renderer
+│   └── agentTools.js       # agent tool schemas + browser runners
 │
 ├── App.css
 ├── index.css
@@ -329,14 +337,14 @@ Speech recognition may not work properly in some browsers.
 # Future Improvements
 
 * Group video calls
-* File sharing
-* Screen sharing
+* File sharing over the data channel
 * TURN server for calls behind strict NATs
 * Server-side proxy for the AI key (so it isn't in the browser)
 * Authentication system
 
-Done in v2/v3: dark/light theme, chat timestamps, typing indicators,
-live captions, AI assistant, multi-page routing, invite links.
+Done in v2/v3/v4: dark/light theme, chat timestamps, typing indicators,
+live captions, AI assistant, multi-page routing, invite links, streaming chat,
+**a tool-using AI agent**, **image understanding (vision)**, **screen sharing**.
 
 ---
 

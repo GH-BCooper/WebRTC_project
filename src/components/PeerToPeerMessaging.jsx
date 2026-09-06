@@ -75,6 +75,8 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
     isMuted,
     toggleCamera,
     isCameraOff,
+    toggleScreenShare,
+    isSharingScreen,
   } = useVideoCall(
     peer,
     partyBId,
@@ -312,6 +314,8 @@ function PeerToPeerMessaging({ initialRecipientId = "" }) {
             isMuted={isMuted}
             toggleCamera={toggleCamera}
             isCameraOff={isCameraOff}
+            toggleScreenShare={toggleScreenShare}
+            isSharingScreen={isSharingScreen}
             captionsSupported={captions.supported}
             captionsEnabled={captions.enabled}
             toggleCaptions={captions.toggle}

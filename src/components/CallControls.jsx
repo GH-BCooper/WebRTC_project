@@ -10,20 +10,22 @@ function CallControls(props) {
     isMuted,
     toggleCamera,
     isCameraOff,
+    toggleScreenShare,
+    isSharingScreen,
     captionsSupported,
     captionsEnabled,
     toggleCaptions,
   } = props;
 
   return (
-    <div>
+    <div className="call-controls">
       {/* Start / Stop Call */}
       {!localStream ? (
         <button onClick={startVideoCall} type="button">
           Start Video Call 📹
         </button>
       ) : (
-        <button onClick={stopVideoCall} type="button">
+        <button onClick={stopVideoCall} type="button" style={{ background: "var(--danger)" }}>
           Stop Video Call
         </button>
       )}
@@ -37,6 +39,10 @@ function CallControls(props) {
 
           <button onClick={toggleCamera} type="button">
             {isCameraOff ? "Camera On 📷" : "Camera Off 📵"}
+          </button>
+
+          <button onClick={toggleScreenShare} type="button">
+            {isSharingScreen ? "Stop Sharing 🖥️" : "Share Screen 🖥️"}
           </button>
 
           {captionsSupported && (

@@ -13,16 +13,21 @@ function useVideoCall(
   // State Management
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [currentCall, setCurrentCall] = useState(null);
 
   // Tracks whether we ended the call ourselves, so we don't show
   // "the other person ended the call" when we pressed stop.
   const endedByMe = useRef(false);
+  const callRef = useRef(null);
+  const cameraTrackRef = useRef(null);
 
   // Wire Up A Call Object (shared by start + answer)
   function attachCallHandlers(call, stream) {
     setLocalStream(stream);
     setCurrentCall(call);
+    callRef.current = call;
+    cameraTrackRef.current = stream.getVideoTracks()[0] || null;
     endedByMe.current = false;
 
     call.on("stream", (remoteStream) => {
@@ -34,6 +39,8 @@ function useVideoCall(
       setRemoteStream(null);
       setLocalStream(null);
       setCurrentCall(null);
+      setIsSharingScreen(false);
+      callRef.current = null;
 
       if (!endedByMe.current) {
         alert("The other person ended the call.");
@@ -76,6 +83,58 @@ function useVideoCall(
       });
   }
 
+  // Swap the outgoing video track (used by screen sharing).
+  function replaceVideoTrack(newTrack) {
+    const sender = callRef.current?.peerConnection
+      ?.getSenders()
+      .find((s) => s.track && s.track.kind === "video");
+    if (sender) sender.replaceTrack(newTrack);
+
+    setLocalStream((prev) => {
+      if (!prev) return prev;
+      const audio = prev.getAudioTracks();
+      const next = new MediaStream([newTrack, ...audio]);
+      return next;
+    });
+  }
+
+  // Start / Stop Screen Sharing
+  function toggleScreenShare() {
+    if (!callRef.current) return;
+
+    if (isSharingScreen) {
+      const camTrack = cameraTrackRef.current;
+      if (camTrack && camTrack.readyState === "live") {
+        replaceVideoTrack(camTrack);
+        setIsSharingScreen(false);
+      } else {
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            const track = stream.getVideoTracks()[0];
+            cameraTrackRef.current = track;
+            replaceVideoTrack(track);
+            setIsSharingScreen(false);
+          })
+          .catch(() => setIsSharingScreen(false));
+      }
+      return;
+    }
+
+    navigator.mediaDevices
+      .getDisplayMedia({ video: true })
+      .then((stream) => {
+        const screenTrack = stream.getVideoTracks()[0];
+        replaceVideoTrack(screenTrack);
+        setIsSharingScreen(true);
+        // When the user stops sharing from the browser UI, go back to camera.
+        screenTrack.onended = () => toggleScreenShare();
+      })
+      .catch((error) => {
+        console.error("Screen share was cancelled or failed:", error);
+      });
+  }
+
   // Stop Video Call
   function stopVideoCall() {
     endedByMe.current = true;
@@ -85,11 +144,14 @@ function useVideoCall(
       setLocalStream(null);
     }
 
+    cameraTrackRef.current?.stop();
     setRemoteStream(null);
+    setIsSharingScreen(false);
 
     if (currentCall) {
       currentCall.close();
       setCurrentCall(null);
+      callRef.current = null;
     }
   }
 
@@ -124,6 +186,8 @@ function useVideoCall(
     isMuted,
     toggleCamera,
     isCameraOff,
+    toggleScreenShare,
+    isSharingScreen,
   };
 }
 

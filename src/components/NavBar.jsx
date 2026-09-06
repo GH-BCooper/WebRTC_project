@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import useTheme from "../hooks/useTheme";
 
@@ -6,25 +6,40 @@ import useTheme from "../hooks/useTheme";
 const LINKS = [
   { to: "/", label: "Home", end: true },
   { to: "/meet", label: "Meet" },
-  { to: "/assistant", label: "AI Assistant" },
+  { to: "/assistant", label: "Assistant" },
+  { to: "/agent", label: "Agent" },
+  { to: "/vision", label: "Vision" },
   { to: "/about", label: "About" },
 ];
 
 // Top Navigation Bar
 function NavBar() {
   const { theme, toggle } = useTheme();
+  const [open, setOpen] = useState(false);
 
   return (
     <>
       <nav className="navbar">
-        <span className="navbar-brand">WebRTC + AI</span>
+        <NavLink to="/" className="navbar-brand" end>
+          <span className="brand-dot" aria-hidden="true" /> WebRTC<span className="brand-accent">+AI</span>
+        </NavLink>
 
-        <div className="navbar-links">
+        <button
+          className="navbar-burger"
+          type="button"
+          aria-label="Toggle menu"
+          onClick={() => setOpen((value) => !value)}
+        >
+          {open ? "✕" : "☰"}
+        </button>
+
+        <div className={open ? "navbar-links open" : "navbar-links"}>
           {LINKS.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.end}
+              onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 isActive ? "navbar-link active" : "navbar-link"
               }

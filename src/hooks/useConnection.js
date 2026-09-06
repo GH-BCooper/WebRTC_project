@@ -147,7 +147,7 @@ function useConnection(peer, partyBId, setPartyBId) {
 
       // Call Rejection Handler
       else if (data.type === "call-rejected") {
-        alert(`${recipientName} rejected your call!`);
+        alert(`${recipientNameRef.current || "The other person"} rejected your call!`);
       }
     });
 

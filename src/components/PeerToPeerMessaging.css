@@ -1,41 +1,53 @@
 :root {
   color-scheme: dark;
-  --page-bg: #111315;
-  --page-sheen: radial-gradient(circle at top, rgba(91, 140, 255, 0.08), transparent 32%);
-  --card-bg: rgba(30, 31, 36, 0.92);
-  --card-border: rgba(255, 255, 255, 0.06);
-  --text-main: #e8eaf0;
-  --text-soft: #a8afbd;
-  --title: #4f8cff;
+  --page-bg: #0d0f16;
+  --page-sheen:
+    radial-gradient(1200px 480px at 12% -8%, rgba(124, 92, 255, 0.20), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, rgba(0, 194, 255, 0.16), transparent 55%),
+    radial-gradient(700px 500px at 50% 120%, rgba(255, 92, 170, 0.12), transparent 60%);
+  --card-bg: rgba(24, 26, 36, 0.92);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --text-main: #e9ebf5;
+  --text-soft: #a3abc2;
+  --title: #8b9bff;
   --input-bg: rgba(255, 255, 255, 0.04);
-  --input-border: rgba(255, 255, 255, 0.09);
-  --surface: rgba(255, 255, 255, 0.03);
-  --surface-2: rgba(255, 255, 255, 0.05);
-  --shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
-  --btn-bg: #2f81f7;
+  --input-border: rgba(255, 255, 255, 0.10);
+  --surface: rgba(255, 255, 255, 0.035);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --shadow: 0 28px 70px rgba(0, 0, 0, 0.38);
+  --btn-bg: linear-gradient(135deg, #6d5cff, #4f8cff);
   --btn-text: #ffffff;
-  --success: #34a853;
-  --danger: #e5484d;
+  --accent: #7c5cff;
+  --accent-2: #00c2ff;
+  --accent-3: #ff5caa;
+  --success: #2fbf71;
+  --danger: #f0555b;
   --muted-btn: #475569;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --page-bg: #f4f6fa;
-  --page-sheen: radial-gradient(circle at top, rgba(79, 140, 255, 0.12), transparent 36%);
-  --card-bg: rgba(255, 255, 255, 0.88);
-  --card-border: rgba(15, 23, 42, 0.08);
-  --text-main: #0f172a;
-  --text-soft: #5f6b7a;
-  --title: #2563eb;
+  --page-bg: #f3f5fb;
+  --page-sheen:
+    radial-gradient(1100px 440px at 10% -10%, rgba(124, 92, 255, 0.16), transparent 60%),
+    radial-gradient(900px 400px at 100% 0%, rgba(0, 160, 220, 0.14), transparent 55%),
+    radial-gradient(700px 460px at 50% 120%, rgba(255, 92, 170, 0.10), transparent 60%);
+  --card-bg: rgba(255, 255, 255, 0.90);
+  --card-border: rgba(15, 23, 42, 0.09);
+  --text-main: #10182b;
+  --text-soft: #566079;
+  --title: #5b52e0;
   --input-bg: #ffffff;
-  --input-border: rgba(15, 23, 42, 0.12);
+  --input-border: rgba(15, 23, 42, 0.14);
   --surface: rgba(15, 23, 42, 0.03);
-  --surface-2: rgba(15, 23, 42, 0.05);
-  --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-  --btn-bg: #2f81f7;
+  --surface-2: rgba(15, 23, 42, 0.06);
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --btn-bg: linear-gradient(135deg, #6d5cff, #4f8cff);
   --btn-text: #ffffff;
-  --success: #2f9e58;
+  --accent: #6d5cff;
+  --accent-2: #0891b2;
+  --accent-3: #db2777;
+  --success: #1f9d57;
   --danger: #dc3545;
   --muted-btn: #64748b;
 }

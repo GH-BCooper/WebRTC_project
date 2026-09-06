@@ -38,7 +38,7 @@ function usePeer(localStream, setLocalStream, setRemoteStream, onIncomingCall) {
   useEffect(() => {
     if (partyAId) {
       const peerInstance = new Peer(partyAId, {
-        debug: 2,
+        debug: 1,
       });
 
       // Peer Connection Open Handler
