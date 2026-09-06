@@ -42,7 +42,16 @@ export function renderMarkdown(source = "") {
         out.push("<ul>");
         inList = true;
       }
-      out.push(`<li>${inline(bullet[1])}</li>`);
+      // GitHub-style task list: "- [ ] todo" / "- [x] done"
+      const task = bullet[1].match(/^\[([ xX])\]\s+(.*)$/);
+      if (task) {
+        const checked = task[1] === " " ? "" : " checked";
+        out.push(
+          `<li class="md-task"><input type="checkbox" disabled${checked}/>${inline(task[2])}</li>`,
+        );
+      } else {
+        out.push(`<li>${inline(bullet[1])}</li>`);
+      }
       continue;
     }
 

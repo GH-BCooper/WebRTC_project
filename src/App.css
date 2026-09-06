@@ -79,19 +79,19 @@
   box-shadow: none;
 }
 
-@media (max-width: 720px) {
-  .navbar-burger {
-    display: inline-block;
-  }
-  .navbar-links {
-    display: none;
-    flex-basis: 100%;
-    flex-direction: column;
-  }
-  .navbar-links.open {
-    display: flex;
-  }
+/* Theme toggle shown as a menu row — mobile only (see mobile section). */
+.navbar-theme {
+  display: none;
+  margin: 0;
+  box-shadow: none;
+  border: 1px solid var(--input-border);
+  background: var(--surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
+
+/* Nav's mobile collapse lives in the mobile section at the end of this file. */
 
 /* ============ Page shell ============ */
 .page {
@@ -234,7 +234,7 @@
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
   gap: 16px;
   margin-top: 48px;
 }
@@ -297,7 +297,7 @@
 
 .ai-route-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 14px;
   margin-top: 16px;
 }
@@ -349,6 +349,10 @@
   gap: 16px;
 }
 
+.ai-settings-row > div {
+  flex: 1 1 200px;
+}
+
 .ai-settings-row select {
   width: 100%;
 }
@@ -391,6 +395,17 @@
 .md a {
   color: var(--accent-2);
 }
+.md ul:has(.md-task) { list-style: none; padding-left: 4px; }
+.md li.md-task {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.md li.md-task input {
+  margin: 3px 0 0;
+  flex: none;
+  accent-color: var(--accent);
+}
 
 /* ============ Assistant ============ */
 .assistant-log {
@@ -414,6 +429,14 @@
   border-radius: 14px;
   background: var(--surface-2);
   max-width: 88%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.assistant-msg .md,
+.assistant-msg .md pre.md-code {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .assistant-msg.user {
@@ -665,7 +688,7 @@
 
 .step-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 16px;
   margin-top: 18px;
 }
@@ -861,4 +884,280 @@
   margin: 6px 0 0;
   color: var(--text-soft);
   font-size: 0.95rem;
+}
+
+/* =====================================================================
+   Mobile / tablet layout
+   Two breakpoints: 860px (nav collapses) and 640px (single-column, most
+   controls go full-width). Goal: no horizontal overflow anywhere, real
+   tap targets, and AI output that always wraps inside the screen.
+   ===================================================================== */
+
+/* ---- Nav collapses to a burger a little earlier (6 links + brand) ---- */
+@media (max-width: 860px) {
+  .navbar {
+    padding: 12px 16px;
+  }
+
+  .navbar-burger {
+    display: inline-block;
+  }
+
+  .navbar-links {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+  .navbar-link {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .navbar-link.active {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 26%, transparent),
+      color-mix(in srgb, var(--accent-2) 26%, transparent)
+    );
+  }
+
+  /* On mobile the floating toggle is replaced by a menu row. */
+  .theme-toggle {
+    display: none;
+  }
+
+  .navbar-theme {
+    display: block;
+    width: 100%;
+    margin-top: 2px;
+  }
+}
+
+/* ---- Tablet ---- */
+@media (max-width: 768px) {
+  .page {
+    padding: 28px 16px 88px;
+  }
+
+  .hero {
+    padding: 20px 0 8px;
+  }
+
+  .hero h1 {
+    font-size: 2.05rem;
+  }
+
+  .hero p {
+    font-size: 1.02rem;
+  }
+
+  .page h1 {
+    font-size: 1.7rem;
+  }
+
+  .page h2 {
+    margin-top: 26px;
+  }
+
+  .feature-grid,
+  .steps,
+  .ai-routes {
+    margin-top: 34px;
+  }
+
+  .agent-log,
+  .assistant-log {
+    height: 62vh;
+    height: 62dvh;
+  }
+}
+
+/* ---- Phone ---- */
+@media (max-width: 640px) {
+  .page {
+    padding: 22px 13px 84px;
+  }
+
+  .page-head h1,
+  .page h1 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .hero h1 {
+    font-size: 1.72rem;
+    max-width: none;
+  }
+
+  .hero-badge {
+    font-size: 0.76rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .problem-band {
+    padding: 16px 16px;
+    margin-top: 28px;
+  }
+
+  .problem-band p {
+    font-size: 0.98rem;
+  }
+
+  /* Primary buttons full-width; chips and links stay inline. */
+  .btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .chip {
+    width: auto;
+    display: inline-block;
+  }
+
+  /* AI toolbars / prompt rows */
+  .ai-toolbar {
+    gap: 8px;
+  }
+
+  .quick-prompts {
+    gap: 6px;
+  }
+
+  .ai-settings-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* In a column, flex-basis is vertical — don't let it stretch each row. */
+  .ai-settings-row > div {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .ai-actions select,
+  .ai-actions button {
+    width: 100%;
+    margin: 0;
+  }
+
+  .ai-actions {
+    gap: 8px;
+  }
+
+  /* (Assistant / Agent / Vision input rows are tuned in
+     PeerToPeerMessaging.css, which loads last and wins the cascade.) */
+
+  .assistant-log {
+    height: 58vh;
+    height: 58dvh;
+    padding: 12px;
+  }
+
+  .agent-log {
+    height: 56vh;
+    height: 56dvh;
+    padding: 12px;
+  }
+
+  .assistant-msg {
+    max-width: 92%;
+  }
+
+  .msg-image {
+    max-width: 70%;
+  }
+
+  /* Agent tool call cards */
+  .tool-io {
+    font-size: 0.74rem;
+    padding: 9px 10px;
+  }
+
+  .agent-notes {
+    padding: 14px;
+  }
+
+  /* Vision dropzone */
+  .dropzone {
+    min-height: 160px;
+    padding: 18px;
+  }
+
+  .dropzone img {
+    max-height: 260px;
+  }
+
+  /* Sessions dashboard */
+  .session-form {
+    padding: 16px;
+  }
+
+  .session-card {
+    padding: 15px;
+  }
+
+  .session-card-head {
+    flex-wrap: wrap;
+  }
+
+  .session-card-head time {
+    flex-basis: 100%;
+  }
+
+  .session-card-actions {
+    gap: 8px;
+  }
+
+  .session-card-actions .btn {
+    width: auto;
+    display: inline-block;
+  }
+
+  /* Recap panel */
+  .recap {
+    padding: 16px;
+  }
+
+  .recap-head {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .recap-head h2 {
+    font-size: 1.3rem;
+  }
+
+  /* Markdown output never pushes the page wide */
+  .md pre.md-code {
+    font-size: 0.8rem;
+  }
+}
+
+/* ---- Very small phones ---- */
+@media (max-width: 380px) {
+  .page {
+    padding: 20px 11px 84px;
+  }
+
+  .hero h1 {
+    font-size: 1.55rem;
+  }
 }

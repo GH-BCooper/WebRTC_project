@@ -47,10 +47,21 @@ function NavBar() {
               {link.label}
             </NavLink>
           ))}
+
+          {/* Theme toggle as a menu row (mobile only — see CSS) */}
+          <button
+            className="navbar-link navbar-theme"
+            onClick={toggle}
+            type="button"
+          >
+            <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>{" "}
+            {theme === "dark" ? "Light mode" : "Dark mode"}
+          </button>
         </div>
       </nav>
 
-      {/* Global theme toggle (fixed, bottom-right) */}
+      {/* Global theme toggle (fixed, bottom-right on desktop; hidden on mobile,
+          where it lives in the nav menu instead) */}
       <button className="theme-toggle" onClick={toggle} type="button">
         <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
         <span className="theme-toggle-text">

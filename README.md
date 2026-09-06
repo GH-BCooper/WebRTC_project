@@ -1,13 +1,18 @@
 # OfficeHours — 1:1 calls that remember what happened
 
-> **Version 5 is here.** See [versionFive.md](versionFive.md) — the whole project
-> is now wrapped in **OfficeHours**, a browser-only platform for one-to-one
-> sessions (mentoring, tutoring, consults, interviews) with an **AI scribe**:
-> plan a session, share a link, talk peer-to-peer, and get an AI-written
-> **recap + action items** saved to your session history.
-> [versionFour.md](versionFour.md) added the tool-using agent, vision and screen
-> sharing; [versionThree.md](versionThree.md) multi-page routing + streaming chat;
-> [versionTwo.md](versionTwo.md) the earlier AI assistant and bug fixes.
+> **Version 6 is here.** See [versionSix.md](versionSix.md) — the entire app now
+> has a proper **mobile view** (every page, every AI response, both themes, no
+> horizontal scroll, real tap targets) plus a **`npm test` smoke suite** that
+> mounts all 7 routes, round-trips the session store, runs every agent tool and
+> checks the Markdown renderer.
+> [versionFive.md](versionFive.md) wrapped the project in **OfficeHours**, a
+> browser-only platform for one-to-one sessions (mentoring, tutoring, consults,
+> interviews) with an **AI scribe**: plan a session, share a link, talk
+> peer-to-peer, and get an AI-written **recap + action items** saved to your
+> session history. [versionFour.md](versionFour.md) added the tool-using agent,
+> vision and screen sharing; [versionThree.md](versionThree.md) multi-page
+> routing + streaming chat; [versionTwo.md](versionTwo.md) the earlier AI
+> assistant and bug fixes.
 
 A real-time peer-to-peer communication platform built with React, WebRTC and PeerJS,
 with Claude layered on top as a meeting scribe plus three AI playgrounds.
@@ -137,10 +142,16 @@ src/
 │   ├── agentTools.js        # agent tool schemas + browser runners
 │   └── sessions.js          # OfficeHours session store (localStorage)
 │
-├── App.css
+├── App.css                  # shared/page styles + the full mobile layout section
 ├── index.css
-└── index.js
+├── index.js
+├── setupTests.js            # jsdom polyfills for the test run
+└── smoke.test.js            # `npm test` — mounts every route + core pipeline
 ```
+
+Theme tokens live in `src/components/PeerToPeerMessaging.css` (`:root`). That file
+also holds the room styles and, because it loads last, the mobile rules that need to
+win the cross-file cascade.
 
 ---
 
@@ -181,13 +192,9 @@ npm install peerjs
 ## Start Development Server
 
 ```bash
-npm start
-```
-
-The application will run on:
-
-```bash
-http://localhost:3000
+npm start          # http://localhost:3000
+npm test           # smoke test — every route + the session/agent/markdown pipeline
+npm run build      # production build (fails on any ESLint warning under CI=1)
 ```
 
 ---
@@ -353,10 +360,11 @@ Speech recognition may not work properly in some browsers.
 * TURN server for calls behind strict NATs
 * Server-side proxy for the AI key (so it isn't in the browser)
 
-Done in v2/v3/v4/v5: dark/light theme, chat timestamps, typing indicators,
+Done in v2/v3/v4/v5/v6: dark/light theme, chat timestamps, typing indicators,
 live captions, AI assistant, multi-page routing, invite links, streaming chat,
 a tool-using AI agent, image understanding (vision), screen sharing,
-**the OfficeHours session wrapper + AI recap**.
+**the OfficeHours session wrapper + AI recap**, a **full mobile view** and a
+**`npm test` smoke suite**.
 
 ---
 
