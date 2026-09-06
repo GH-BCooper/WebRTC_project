@@ -13,16 +13,17 @@ import useVideoCall from "../hooks/useVideoCall";
 import usePeer from "../hooks/usePeer";
 import useConnection from "../hooks/useConnection";
 import useLiveCaptions from "../hooks/useLiveCaptions";
+import { playBeep } from "../lib/sound";
+
+const APP_TITLE = "WebRTC + AI (PeerJS)";
 
 // Peer To Peer Messaging Component
-function PeerToPeerMessaging() {
+function PeerToPeerMessaging({ initialRecipientId = "" }) {
   // Stream + UI State
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
   const [draft, setDraft] = useState("");
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem("theme") || "dark",
-  );
+  const [copied, setCopied] = useState("");
 
   // Incoming Call Reference
   const pendingCall = useRef(null);
@@ -57,6 +58,14 @@ function PeerToPeerMessaging() {
     rejectCallRequest,
   } = useConnection(peer, partyBId, setPartyBId);
 
+  // Pre-fill the recipient ID from a shared invite link (once).
+  useEffect(() => {
+    if (initialRecipientId && connectionStatus === "idle") {
+      setPartyBId(initialRecipientId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRecipientId]);
+
   // Video Call Hook
   const {
     startVideoCall,
@@ -77,16 +86,36 @@ function PeerToPeerMessaging() {
   );
 
   // Messaging + Speech + Captions Hooks
-  const { messages, sendMessage } = useMessaging(activeConn);
+  const { messages, sendMessage, peerTyping, notifyTyping } =
+    useMessaging(activeConn);
   const speech = useSpeechRecognition(setDraft);
 
   const callActive = localStream !== null;
   const captions = useLiveCaptions(activeConn, callActive);
 
-  // Call Handlers
+  // Notification sound + tab badge for messages that arrive while away.
+  useEffect(() => {
+    const last = messages[messages.length - 1];
+    if (last && last.type === "incoming" && document.hidden) {
+      playBeep();
+      document.title = `💬 New message — ${APP_TITLE}`;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const clearBadge = () => {
+      document.title = APP_TITLE;
+    };
+    window.addEventListener("focus", clearBadge);
+    return () => {
+      window.removeEventListener("focus", clearBadge);
+      document.title = APP_TITLE;
+    };
+  }, []);
+
+  // Handlers
   function handleAcceptCall() {
     acceptCallRequest();
-
     if (pendingCall.current) {
       answerCall(pendingCall.current);
       pendingCall.current = null;
@@ -98,7 +127,11 @@ function PeerToPeerMessaging() {
     pendingCall.current = null;
   }
 
-  // Message Handlers
+  function handleDraftChange(value) {
+    setDraft(value);
+    notifyTyping();
+  }
+
   function handleSend() {
     if (sendMessage(draft)) {
       setDraft("");
@@ -113,32 +146,31 @@ function PeerToPeerMessaging() {
     }
   }
 
-  // Theme
-  function toggleTheme() {
-    setTheme((current) => {
-      const next = current === "dark" ? "light" : "dark";
-      localStorage.setItem("theme", next);
-      return next;
+  function copy(text, label) {
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopied(label);
+      setTimeout(() => setCopied(""), 1500);
     });
   }
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
+  const inviteLink = `${window.location.origin}/meet?peer=${partyAId}`;
   const isConnected = connectionStatus === "connected";
 
-  // Shared messaging + AI block (same in and out of a call)
+  // Shared messaging + AI block
   const conversation = (
     <>
       <MessageInput
         value={draft}
-        onChange={setDraft}
+        onChange={handleDraftChange}
         onSend={handleSend}
         listening={speech.listening}
         onToggleSpeech={toggleSpeech}
         speechSupported={speech.supported}
       />
+
+      <p className="typing-line">
+        {peerTyping ? `${recipientName || "They"} are typing…` : ""}
+      </p>
 
       <AIPanel
         messages={messages}
@@ -159,14 +191,7 @@ function PeerToPeerMessaging() {
   );
 
   return (
-    <div id="container" data-theme={theme}>
-      <button className="theme-toggle" onClick={toggleTheme} type="button">
-        <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
-        <span className="theme-toggle-text">
-          {theme === "dark" ? "Light" : "Dark"}
-        </span>
-      </button>
-
+    <div id="container">
       {/* Popups */}
       {incomingRequest && (
         <ConnectionRequest
@@ -187,8 +212,8 @@ function PeerToPeerMessaging() {
 
       {/* Heading */}
       <h1>
-        {isConnected ? "WebRTC" : "Welcome to WebRTC"}{" "}
-        <span className="small-text">(using PeerJS!)</span>
+        {isConnected ? "You're connected" : "Start a meeting"}{" "}
+        <span className="small-text">(WebRTC + PeerJS)</span>
       </h1>
 
       {/* Connection Info */}
@@ -201,7 +226,14 @@ function PeerToPeerMessaging() {
           </>
         ) : (
           <>
-            Your ID: <span id="partyAId">{partyAId}</span>
+            Your ID: <span id="partyAId">{partyAId}</span>{" "}
+            <button
+              className="mini-btn"
+              type="button"
+              onClick={() => copy(partyAId, "id")}
+            >
+              {copied === "id" ? "Copied!" : "Copy ID"}
+            </button>
           </>
         )}
       </p>
@@ -209,6 +241,14 @@ function PeerToPeerMessaging() {
       {/* Idle State */}
       {connectionStatus === "idle" && (
         <>
+          <button
+            className="mini-btn"
+            type="button"
+            onClick={() => copy(inviteLink, "link")}
+          >
+            {copied === "link" ? "Invite link copied!" : "Copy invite link 🔗"}
+          </button>
+
           <label htmlFor="yourName">Your Name:</label>
           <input
             type="text"

@@ -1,7 +1,9 @@
 # WebRTC using PeerJS
 
-> **Version 2 is here.** See [versionTwo.md](versionTwo.md) for the AI features
-> (AI assistant, live call captions), bug fixes, and the full tech list.
+> **Version 3 is here.** See [versionThree.md](versionThree.md) — multi-page app
+> (React Router), a streaming AI chat page, invite links, typing indicator and
+> notification alerts. [versionTwo.md](versionTwo.md) covers the earlier AI
+> assistant and bug fixes.
 
 A real-time peer-to-peer communication application built using React, WebRTC, and PeerJS.
 
@@ -86,7 +88,9 @@ The application uses PeerJS on top of WebRTC to simplify peer-to-peer communicat
 src/
 │
 ├── components/
-│   ├── App.jsx
+│   ├── App.jsx              # router
+│   ├── NavBar.jsx
+│   ├── AISettings.jsx
 │   ├── AIPanel.jsx
 │   ├── CallControls.jsx
 │   ├── ConnectionRequest.jsx
@@ -94,10 +98,18 @@ src/
 │   ├── MessageInput.jsx
 │   ├── MessageList.jsx
 │   ├── PeerToPeerMessaging.jsx
+│   ├── PeerToPeerMessaging.css
 │   └── VideoSection.jsx
+│
+├── pages/
+│   ├── Home.jsx
+│   ├── Meet.jsx
+│   ├── Assistant.jsx
+│   └── About.jsx
 │
 ├── hooks/
 │   ├── useAI.js
+│   ├── useTheme.js
 │   ├── useConnection.js
 │   ├── useLiveCaptions.js
 │   ├── useMessaging.js
@@ -105,10 +117,12 @@ src/
 │   ├── useSpeechRecognition.js
 │   └── useVideoCall.js
 │
+├── lib/
+│   └── sound.js
+│
 ├── App.css
 ├── index.css
-├── index.js
-└── PeerToPeerMessaging.css
+└── index.js
 ```
 
 ---
@@ -317,12 +331,12 @@ Speech recognition may not work properly in some browsers.
 * Group video calls
 * File sharing
 * Screen sharing
-* Better mobile responsiveness
-* Chat timestamps UI
-* Typing indicators
+* TURN server for calls behind strict NATs
+* Server-side proxy for the AI key (so it isn't in the browser)
 * Authentication system
-* End-to-end encryption enhancements
-* Dark/Light theme
+
+Done in v2/v3: dark/light theme, chat timestamps, typing indicators,
+live captions, AI assistant, multi-page routing, invite links.
 
 ---
 

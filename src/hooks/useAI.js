@@ -74,6 +74,41 @@ function useAI() {
     [client, model],
   );
 
+  // Streaming Chat (used by the standalone AI Assistant page)
+  const chatStream = useCallback(
+    async (history, onDelta) => {
+      if (!client) throw new Error("Add your Anthropic API key first.");
+
+      setBusy(true);
+      setError("");
+
+      try {
+        const stream = client.messages.stream({
+          model,
+          max_tokens: 1024,
+          system:
+            "You are a friendly, concise assistant inside a small WebRTC demo app. Keep answers short unless asked for detail.",
+          messages: history,
+        });
+
+        stream.on("text", (delta) => onDelta(delta));
+
+        const final = await stream.finalMessage();
+
+        return final.content
+          .filter((block) => block.type === "text")
+          .map((block) => block.text)
+          .join("");
+      } catch (requestError) {
+        setError(requestError?.message || "The AI request failed.");
+        throw requestError;
+      } finally {
+        setBusy(false);
+      }
+    },
+    [client, model],
+  );
+
   // Helper: Summarize The Conversation
   const summarize = useCallback(
     (transcript) =>
@@ -141,6 +176,7 @@ function useAI() {
     busy,
     error,
     ready: !!client,
+    chatStream,
     summarize,
     smartReplies,
     rewrite,

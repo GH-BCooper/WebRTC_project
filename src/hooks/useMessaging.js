@@ -1,21 +1,34 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // Messaging Hook
-// Sends and receives chat messages over the single active peer data connection.
+// Sends and receives chat messages (and typing pings) over the single active
+// peer data connection.
 function useMessaging(activeConn) {
-  // Message State Management
+  // State Management
   const [messages, setMessages] = useState([]);
+  const [peerTyping, setPeerTyping] = useState(false);
+  const typingClearRef = useRef(null);
 
-  // Incoming Message Listener
+  // Incoming Data Listener
   useEffect(() => {
-    if (!activeConn) return;
+    if (!activeConn) {
+      setPeerTyping(false);
+      return;
+    }
 
     const handleData = (data) => {
-      if (data && data.type === "chat") {
+      if (!data || !data.type) return;
+
+      if (data.type === "chat") {
         setMessages((prev) => [
           ...prev,
           { text: data.text, type: "incoming", time: data.time || Date.now() },
         ]);
+        setPeerTyping(false);
+      } else if (data.type === "typing") {
+        setPeerTyping(true);
+        clearTimeout(typingClearRef.current);
+        typingClearRef.current = setTimeout(() => setPeerTyping(false), 3000);
       }
     };
 
@@ -23,6 +36,7 @@ function useMessaging(activeConn) {
 
     return () => {
       activeConn.off("data", handleData);
+      clearTimeout(typingClearRef.current);
     };
   }, [activeConn]);
 
@@ -50,8 +64,15 @@ function useMessaging(activeConn) {
     [activeConn],
   );
 
+  // Let The Other Side Know We Are Typing
+  const notifyTyping = useCallback(() => {
+    if (activeConn && activeConn.open !== false) {
+      activeConn.send({ type: "typing" });
+    }
+  }, [activeConn]);
+
   // Hook Return Values
-  return { messages, sendMessage };
+  return { messages, sendMessage, peerTyping, notifyTyping };
 }
 
 // Export Hook

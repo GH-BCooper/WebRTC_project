@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import useAI, { AI_MODELS } from "../hooks/useAI";
+import useAI from "../hooks/useAI";
+import AISettings from "./AISettings";
 
 // Tone / language options
 const TONES = ["friendly", "professional", "concise", "funny"];
@@ -103,31 +104,7 @@ function AIPanel(props) {
             {showSettings ? "Hide settings" : "Settings"}
           </button>
 
-          {showSettings && (
-            <div className="ai-settings">
-              <label htmlFor="ai-key">Anthropic API key (stored in this browser only)</label>
-              <input
-                id="ai-key"
-                type="password"
-                value={ai.apiKey}
-                onChange={(event) => ai.setApiKey(event.target.value)}
-                placeholder="sk-ant-..."
-              />
-
-              <label htmlFor="ai-model">Model</label>
-              <select
-                id="ai-model"
-                value={ai.model}
-                onChange={(event) => ai.setModel(event.target.value)}
-              >
-                {AI_MODELS.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          {showSettings && <AISettings ai={ai} />}
 
           {!ai.ready && (
             <p className="ai-hint">
